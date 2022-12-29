@@ -14,6 +14,10 @@ public class PaymentReq {
 
 	private LocalDate paymentDate;
 
+	private LocalDate startDate;
+
+	private LocalDate endDate;
+
 	private boolean lateChecked;
 
 	private int paymentMonths;
@@ -22,12 +26,9 @@ public class PaymentReq {
 
 	private int rentsMonth;
 
-//	==========
-	LocalDate newPaymentDate;
+	private int pageSize;
 
-	int newPaymentMonths;
-
-	int newRentsMonth;
+	private int startPosition;
 
 	public PaymentReq() {
 
@@ -41,20 +42,20 @@ public class PaymentReq {
 		this.id = id;
 	}
 
-	public String getPaymentMethod() {
-		return paymentMethod;
-	}
-
-	public void setPaymentMethod(String paymentMethod) {
-		this.paymentMethod = paymentMethod;
-	}
-
 	public String getObjectId() {
 		return objectId;
 	}
 
 	public void setObjectId(String objectId) {
 		this.objectId = objectId;
+	}
+
+	public String getPaymentMethod() {
+		return paymentMethod;
+	}
+
+	public void setPaymentMethod(String paymentMethod) {
+		this.paymentMethod = paymentMethod;
 	}
 
 	public int getPaymentDeadline() {
@@ -71,6 +72,22 @@ public class PaymentReq {
 
 	public void setPaymentDate(LocalDate paymentDate) {
 		this.paymentDate = paymentDate;
+	}
+
+	public LocalDate getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(LocalDate startDate) {
+		this.startDate = startDate;
+	}
+
+	public LocalDate getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(LocalDate endDate) {
+		this.endDate = endDate;
 	}
 
 	public boolean isLateChecked() {
@@ -105,28 +122,20 @@ public class PaymentReq {
 		this.rentsMonth = rentsMonth;
 	}
 
-	public LocalDate getNewPaymentDate() {
-		return newPaymentDate;
+	public int getPageSize() {
+		return pageSize;
 	}
 
-	public void setNewPaymentDate(LocalDate newPaymentDate) {
-		this.newPaymentDate = newPaymentDate;
+	public void setPageSize(int pageSize) {
+		this.pageSize = pageSize;
 	}
 
-	public int getNewPaymentMonths() {
-		return newPaymentMonths;
+	public int getStartPosition() {
+		return startPosition;
 	}
 
-	public void setNewPaymentMonths(int newPaymentMonths) {
-		this.newPaymentMonths = newPaymentMonths;
-	}
-
-	public int getNewRentsMonth() {
-		return newRentsMonth;
-	}
-
-	public void setNewRentsMonth(int newRentsMonth) {
-		this.newRentsMonth = newRentsMonth;
+	public void setStartPosition(int startPosition) {
+		this.startPosition = startPosition;
 	}
 
 }

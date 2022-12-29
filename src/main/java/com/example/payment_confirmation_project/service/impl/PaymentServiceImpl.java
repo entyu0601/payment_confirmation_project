@@ -3,32 +3,29 @@ package com.example.payment_confirmation_project.service.impl;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import com.example.payment_confirmation_project.constants.RtnInfo;
-import com.example.payment_confirmation_project.entity.MonthsShow;
+
 import com.example.payment_confirmation_project.entity.Payment;
 import com.example.payment_confirmation_project.entity.Personal;
-import com.example.payment_confirmation_project.repository.MonthsShowDao;
+
 import com.example.payment_confirmation_project.repository.PaymentDao;
 import com.example.payment_confirmation_project.repository.PersonalDao;
 import com.example.payment_confirmation_project.service.ifs.PaymentService;
-import com.example.payment_confirmation_project.vo.MonthsInfo;
-import com.example.payment_confirmation_project.vo.MonthsShowRes;
+
 import com.example.payment_confirmation_project.vo.PaymentDataRes;
 import com.example.payment_confirmation_project.vo.PaymentInfo;
 import com.example.payment_confirmation_project.vo.PaymentRes;
 
 @Service
-public class PaymentServiceImpl implements PaymentService {
+public class PaymentServiceImpl extends BaseDao implements PaymentService {
 
 	@Autowired
 	private PaymentDao paymentDao;
@@ -36,10 +33,7 @@ public class PaymentServiceImpl implements PaymentService {
 	@Autowired
 	private PersonalDao personalDao;
 
-	@Autowired
-	private MonthsShowDao monthsShowDao;
-
-	/* do Query */
+	/* do Query -->取得資料庫所有資料(已合併過的兩張表資訊) */
 	@Override
 	public PaymentRes doQueryInfo() {
 		List<PaymentInfo> paymentList = paymentDao.doQueryInfo();
@@ -49,27 +43,32 @@ public class PaymentServiceImpl implements PaymentService {
 		return new PaymentRes(paymentList, RtnInfo.DATA_IS_FOUND.getMessage());
 	}
 
-	/* do Query By ObjectId */
+	/* getPaymentInfo ById -->利用抓取payment唯一ID，取得那一整筆資料 */
 	@Override
-	public PaymentRes doQueryInfo(String objectId) {
-		List<PaymentInfo> paymentList = paymentDao.doQueryInfo(objectId);
+	public PaymentRes getPaymentInfo(int id) {
+		PaymentInfo paymentInfo = paymentDao.getPaymentById(id);
+		if (paymentInfo == null) {
+			return new PaymentRes(RtnInfo.DATA_IS_FOUND.getMessage());
+		}
+		return new PaymentRes(paymentInfo, RtnInfo.GET_ID_SUCCESSFUL.getMessage());
+	}
+
+	/* do Query By PaymentDate --> 年月檢索機能 */
+	@Override
+	public PaymentRes doQueryByPaymentDate(LocalDate startDate, LocalDate endDate) {
+
+		if (startDate.isAfter(endDate) || endDate.isBefore(startDate)) {
+			return new PaymentRes(RtnInfo.TIME_SELECT_WRONG.getMessage());
+		}
+
+		List<PaymentInfo> paymentList = paymentDao.findByPaymentDateBetween(startDate, endDate);
 		if (CollectionUtils.isEmpty(paymentList)) {
 			return new PaymentRes(RtnInfo.DATA_NOT_FOUND.getMessage());
 		}
 		return new PaymentRes(paymentList, RtnInfo.DATA_IS_FOUND.getMessage());
 	}
 
-	/* do Query By PaymentDate */
-	@Override
-	public PaymentRes doQueryByPaymentDate(LocalDate paymentDate) {
-		List<PaymentInfo> paymentList = paymentDao.doQueryInfoByPaymentDate(paymentDate);
-		if (CollectionUtils.isEmpty(paymentList)) {
-			return new PaymentRes(RtnInfo.DATA_NOT_FOUND.getMessage());
-		}
-		return new PaymentRes(paymentList, RtnInfo.DATA_IS_FOUND.getMessage());
-	}
-
-	/* do Query By RentsMonth */
+	/* do Query By RentsMonth --> 月份檢索機能 */
 	@Override
 	public PaymentRes doQueryByRentsMonth(int rentsMonth) {
 		List<PaymentInfo> paymentList = paymentDao.doQueryInfoByRentsMonth(rentsMonth);
@@ -79,7 +78,7 @@ public class PaymentServiceImpl implements PaymentService {
 		return new PaymentRes(paymentList, RtnInfo.DATA_IS_FOUND.getMessage());
 	}
 
-	/* createPayment */
+	/* createPayment --> 創建輸入資料 */
 	@Override
 	public PaymentDataRes createPayment(String objectId, int paymentDeadline, LocalDate paymentDate,
 			String paymentMethod, int paymentMonths, int rentsMonth) throws Exception {
@@ -122,12 +121,12 @@ public class PaymentServiceImpl implements PaymentService {
 			Payment newPayment = new Payment(payment.getId(), objectId, paymentDeadline, paymentDate, paymentMethod,
 					payment.getLateChecked(), paymentMonths, payment.getPaymentAmount(), rentsMonth);
 			paymentDao.save(newPayment);
-			return new PaymentDataRes(newPayment, RtnInfo.SUCCESSFUL.getMessage());
+			return new PaymentDataRes(newPayment, RtnInfo.CREATED_SUCCESSFUL.getMessage());
 		}
 
 	}
 
-	/* updatePayment */
+	/* updatePayment --> 編輯功能(更動日期) */
 	@Override
 	public PaymentDataRes updatePayment(int id, String objectId, LocalDate paymentDate, int paymentMonths,
 			int rentsMonth) throws Exception {
@@ -152,10 +151,6 @@ public class PaymentServiceImpl implements PaymentService {
 		Personal personal = idOp.get();
 		Payment payment = paymentOp.get();
 
-		if (payment.getRentsMonth() == rentsMonth) {
-			return new PaymentDataRes(RtnInfo.RENTMONTH_ALREADT_EXIST.getMessage());
-		}
-
 		payment.setPaymentAmount(personal.getRent() * paymentMonths);
 
 		// 判定 遲交/已繳交
@@ -170,96 +165,13 @@ public class PaymentServiceImpl implements PaymentService {
 				payment.getPaymentMethod(), payment.getLateChecked(), paymentMonths, payment.getPaymentAmount(),
 				rentsMonth);
 		paymentDao.save(newPayment);
-		return new PaymentDataRes(newPayment, RtnInfo.SUCCESSFUL.getMessage());
+		return new PaymentDataRes(newPayment, RtnInfo.UPDATE_SUCCESSFUL.getMessage());
 	}
-
-	/* do Query MonthsInfo */
-	@Override
-	public MonthsShowRes doQueryMonthsInfo() {
-		List<MonthsInfo> monthsList = monthsShowDao.doQueryMonthsInfo();
-		if (CollectionUtils.isEmpty(monthsList)) {
-			return new MonthsShowRes(RtnInfo.DATA_NOT_FOUND.getMessage());
-		}
-		return new MonthsShowRes(monthsList, RtnInfo.DATA_IS_FOUND.getMessage());
-	}
-
-	/* getPaymentInfo */
-	@Override
-	public PaymentRes getPaymentInfo(int id) {
-		PaymentInfo paymentInfo = paymentDao.getPaymentById(id);
-		if (paymentInfo == null) {
-			return new PaymentRes(RtnInfo.DATA_IS_FOUND.getMessage());
-		}
-		return new PaymentRes(paymentInfo, RtnInfo.SUCCESSFUL.getMessage());
-	}
-
-	/* set 12months checked */
-	@Override
-	public MonthsShowRes allMonths(String objectId) {
-
-		if (!StringUtils.hasText(objectId)) {
-			return new MonthsShowRes(RtnInfo.VALUE_REQUIRED.getMessage());
-		}
-
-		MonthsShowRes checkResult = checkObjectIdExist(objectId);
-		if (checkResult != null) {
-			return checkResult;
-		}
-
-		List<Payment> payment = paymentDao.findByObjectId(objectId);
-		MonthsShow month = new MonthsShow();
-
-		for (int i = 0; i < payment.size(); i++) {
-
-			switch (payment.get(i).getRentsMonth()) {
-
-			case 1:
-				month.setJanuary(payment.get(i).getLateChecked());
-				break;
-			case 2:
-				month.setFebruary(payment.get(i).getLateChecked());
-				break;
-			case 3:
-				month.setMarch(payment.get(i).getLateChecked());
-				break;
-			case 4:
-				month.setApril(payment.get(i).getLateChecked());
-				break;
-			case 5:
-				month.setMay(payment.get(i).getLateChecked());
-				break;
-			case 6:
-				month.setJune(payment.get(i).getLateChecked());
-				break;
-			case 7:
-				month.setJuly(payment.get(i).getLateChecked());
-				break;
-			case 8:
-				month.setAugust(payment.get(i).getLateChecked());
-				break;
-			case 9:
-				month.setSeptember(payment.get(i).getLateChecked());
-				break;
-			case 10:
-				month.setOctober(payment.get(i).getLateChecked());
-				break;
-			case 11:
-				month.setNovember(payment.get(i).getLateChecked());
-				break;
-			case 12:
-				month.setDecember(payment.get(i).getLateChecked());
-				break;
-			}
-		}
-		MonthsShow newmonth = new MonthsShow(objectId, month.getJanuary(), month.getFebruary(), month.getMarch(),
-				month.getApril(), month.getMay(), month.getJune(), month.getJuly(), month.getAugust(),
-				month.getSeptember(), month.getOctober(), month.getNovember(), month.getDecember());
-		monthsShowDao.save(newmonth);
-		return new MonthsShowRes(newmonth, RtnInfo.SUCCESSFUL.getMessage());
-	}
-
+	
+	
 	/* ========================================================== */
-	/* 檢查格式 */
+
+	/* 檢查輸入格式 */
 	private PaymentDataRes checkParam(int paymentDeadline, LocalDate paymentDate, String paymentMethod,
 			int paymentMonths, int rentsMonth) throws Exception {
 		if (paymentDeadline < 0 || paymentDeadline > 31) {
@@ -283,23 +195,6 @@ public class PaymentServiceImpl implements PaymentService {
 		return !week.contains(rentsMonth);
 	}
 
-	/* 判斷房屋是否存在 */
-	private MonthsShowRes checkObjectIdExist(String objectId) {
-		List<Payment> paymentList = paymentDao.findByObjectId(objectId);
-		Set<String> oldIdSet = new HashSet<>();
-		Set<String> noExistIdSet = new HashSet<>();
-		for (Payment existItem : paymentList) {
-			oldIdSet.add(existItem.getObjectId());
-		}
-
-		if (!oldIdSet.contains(objectId)) {
-			noExistIdSet.add(objectId);
-		}
-
-		if (!CollectionUtils.isEmpty(noExistIdSet)) {
-			return new MonthsShowRes(RtnInfo.DATA_NOT_EXIST.getMessage());
-		}
-		return null;
-	}
+	
 
 }

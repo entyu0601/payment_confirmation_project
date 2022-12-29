@@ -1,18 +1,21 @@
 package com.example.payment_confirmation_project.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.payment_confirmation_project.entity.MonthsShow;
-import com.example.payment_confirmation_project.entity.Payment;
+import com.example.payment_confirmation_project.constants.RtnInfo;
+import com.example.payment_confirmation_project.repository.PaymentDaoImpl;
 import com.example.payment_confirmation_project.service.ifs.PaymentService;
-import com.example.payment_confirmation_project.vo.MonthsShowRes;
+
 import com.example.payment_confirmation_project.vo.PaymentDataRes;
+import com.example.payment_confirmation_project.vo.PaymentInfo;
 import com.example.payment_confirmation_project.vo.PaymentReq;
 import com.example.payment_confirmation_project.vo.PaymentRes;
 import com.example.payment_confirmation_project.vo.PersonlReq;
@@ -24,19 +27,22 @@ public class PaymentController {
 	@Autowired
 	private PaymentService paymentService;
 
+	@Autowired
+	private PaymentDaoImpl paymentDaoImpl;
+
 	@PostMapping(value = "/api/doQueryInfo")
 	public PaymentRes doQueryInfo() {
 		return paymentService.doQueryInfo();
 	}
 
-	@PostMapping(value = "/api/doQueryInfoByObjectId")
-	public PaymentRes doQueryInfo(@RequestBody PaymentReq payReq) {
-		return paymentService.doQueryInfo(payReq.getObjectId());
+	@PostMapping(value = "/api/getPaymentInfo")
+	public PaymentRes getPaymentInfo(@RequestBody PaymentReq payReq) {
+		return paymentService.getPaymentInfo(payReq.getId());
 	}
-
+	
 	@PostMapping(value = "/api/doQueryByPaymentDate")
-	public PaymentRes doQueryByPaymentDate(@RequestBody PersonlReq req) {
-		return paymentService.doQueryByPaymentDate(req.getPaymentDate());
+	public PaymentRes doQueryByPaymentDate(@RequestBody PaymentReq payReq) {
+		return paymentService.doQueryByPaymentDate(payReq.getStartDate(), payReq.getEndDate());
 	}
 
 	@PostMapping(value = "/api/doQueryByRentsMonth")
@@ -55,21 +61,16 @@ public class PaymentController {
 		return paymentService.updatePayment(payReq.getId(), payReq.getObjectId(), payReq.getPaymentDate(),
 				payReq.getPaymentMonths(), payReq.getRentsMonth());
 	}
+	
 
-	@PostMapping(value = "/api/getPaymentInfo")
-	public PaymentRes getPaymentInfo(@RequestBody PaymentReq payReq) {
-		return paymentService.getPaymentInfo(payReq.getId());
-	}
-
-//	=============================================
-	@PostMapping(value = "/api/allMonths")
-	public MonthsShowRes allMonths(@RequestBody MonthsShow monthsShow) throws Exception {
-		return paymentService.allMonths(monthsShow.getObjectId());
-	}
-
-	@PostMapping(value = "/api/doQueryMonthsInfo")
-	public MonthsShowRes doQueryMonthsInfo() {
-		return paymentService.doQueryMonthsInfo();
+	@PostMapping(value = "/api/doQueryWithLimitAndPagesize")
+	public PaymentRes doQueryWithLimitAndPagesize(@RequestBody PaymentReq payReq) {
+		List<PaymentInfo> paymentList = paymentDaoImpl.doQueryWithPageSizeAndStartPosition(payReq.getPageSize(),
+				payReq.getStartPosition());
+		if (CollectionUtils.isEmpty(paymentList)) {
+			return new PaymentRes(RtnInfo.DATA_NOT_FOUND.getMessage());
+		}
+		return new PaymentRes(paymentList, RtnInfo.DATA_IS_FOUND.getMessage());
 	}
 
 }
