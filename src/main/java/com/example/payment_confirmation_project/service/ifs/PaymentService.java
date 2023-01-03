@@ -26,6 +26,6 @@ public interface PaymentService {
 	/* updatePayment */
 	public PaymentDataRes updatePayment(int id, String objectId, LocalDate paymentDate, int paymentMonths,
 			int rentsMonth) throws Exception;
-		
-
+	
+	
 }

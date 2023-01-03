@@ -126,7 +126,7 @@ public class PaymentServiceImpl extends BaseDao implements PaymentService {
 
 	}
 
-	/* updatePayment --> 編輯功能(更動日期) */
+	/* updatePayment --> 編輯功能 */
 	@Override
 	public PaymentDataRes updatePayment(int id, String objectId, LocalDate paymentDate, int paymentMonths,
 			int rentsMonth) throws Exception {
@@ -168,6 +168,8 @@ public class PaymentServiceImpl extends BaseDao implements PaymentService {
 		return new PaymentDataRes(newPayment, RtnInfo.UPDATE_SUCCESSFUL.getMessage());
 	}
 	
+
+	
 	
 	/* ========================================================== */
 
@@ -194,6 +196,8 @@ public class PaymentServiceImpl extends BaseDao implements PaymentService {
 		List<Integer> week = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
 		return !week.contains(rentsMonth);
 	}
+
+	
 
 	
 

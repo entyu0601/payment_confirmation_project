@@ -53,7 +53,7 @@ public interface PaymentDao extends JpaRepository<Payment, Integer> {
 			+ "	from Personal per join Payment pay on per.objectId = pay.objectId "
 			+ "	where pay.rentsMonth = :rentsMonth ")
 	public List<PaymentInfo> doQueryInfoByRentsMonth(@Param("rentsMonth") int rentsMonth);
-
+	
 	public List<Payment> findByObjectId(String objectId);
 
 	public List<PaymentInfo> doQueryWithPageSizeAndStartPosition(int pageSize, int startPosition);

@@ -39,7 +39,7 @@ public class PaymentController {
 	public PaymentRes getPaymentInfo(@RequestBody PaymentReq payReq) {
 		return paymentService.getPaymentInfo(payReq.getId());
 	}
-	
+
 	@PostMapping(value = "/api/doQueryByPaymentDate")
 	public PaymentRes doQueryByPaymentDate(@RequestBody PaymentReq payReq) {
 		return paymentService.doQueryByPaymentDate(payReq.getStartDate(), payReq.getEndDate());
@@ -61,7 +61,6 @@ public class PaymentController {
 		return paymentService.updatePayment(payReq.getId(), payReq.getObjectId(), payReq.getPaymentDate(),
 				payReq.getPaymentMonths(), payReq.getRentsMonth());
 	}
-	
 
 	@PostMapping(value = "/api/doQueryWithLimitAndPagesize")
 	public PaymentRes doQueryWithLimitAndPagesize(@RequestBody PaymentReq payReq) {
@@ -72,5 +71,6 @@ public class PaymentController {
 		}
 		return new PaymentRes(paymentList, RtnInfo.DATA_IS_FOUND.getMessage());
 	}
+
 
 }
