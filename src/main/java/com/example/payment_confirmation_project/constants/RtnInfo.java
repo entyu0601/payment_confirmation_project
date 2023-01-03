@@ -10,7 +10,7 @@ public enum RtnInfo {
 	
 	DATA_NOT_FOUND("400", "Data is not found!"),
 	DATA_NOT_EXIST("400", "無此房屋訊息，請重新填寫"),
-	TIME_SELECT_WRONG("400", "選取時間範圍不合格式!"),
+	TIME_FORMAT_FAILED("400", "選取時間範圍不合格式!"),
 	RENTMONTH_ALREADT_EXIST("400", "已繳過該月份的房租"),
 	
 	DEADLINE_INCORRECT_DATA("400", "予定日資料不得為空，範圍在1~31日之內"),

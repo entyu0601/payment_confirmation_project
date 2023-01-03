@@ -58,7 +58,7 @@ public class PaymentServiceImpl extends BaseDao implements PaymentService {
 	public PaymentRes doQueryByPaymentDate(LocalDate startDate, LocalDate endDate) {
 
 		if (startDate.isAfter(endDate) || endDate.isBefore(startDate)) {
-			return new PaymentRes(RtnInfo.TIME_SELECT_WRONG.getMessage());
+			return new PaymentRes(RtnInfo.TIME_FORMAT_FAILED.getMessage());
 		}
 
 		List<PaymentInfo> paymentList = paymentDao.findByPaymentDateBetween(startDate, endDate);
