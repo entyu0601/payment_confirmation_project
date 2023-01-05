@@ -9,9 +9,9 @@ import com.example.payment_confirmation_project.vo.PaymentInfo;
 
 public class PaymentDaoImpl extends BaseDao {
 
-	/* doQuery With pageSize And startPosition*/
+	/* doQuery　With　Limit　And　PageSize --> 検索数（検索機能） */
 	public List<PaymentInfo> doQueryWithPageSizeAndStartPosition(int pageSize, int startPosition) {
-		StringBuffer sb = new StringBuffer(); // StringBuffer : �r��s��
+		StringBuffer sb = new StringBuffer(); 
 		sb.append(" select new com.example.payment_confirmation_project.vo.PaymentInfo"
 				+ "(pay.id, pay.objectId, per.building, per.ownerName, per.tenantName, per.rent, pay.paymentDeadline,"
 				+ " pay.paymentDate, pay.paymentMethod, pay.lateChecked, pay.paymentMonths, pay.paymentAmount, pay.rentsMonth) "

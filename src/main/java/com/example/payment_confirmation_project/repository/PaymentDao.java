@@ -15,14 +15,6 @@ import com.example.payment_confirmation_project.vo.PaymentInfo;
 @Repository
 public interface PaymentDao extends JpaRepository<Payment, Integer> {
 
-	/*
-	 * @Modifying:聲明執行的SQL語句為更新(增刪改)操作
-	 * 
-	 * @Query("SQL語句):表名要與Entity的實體類名相同、欄位名稱要與實體類中定義的屬性名相同
-	 * 
-	 * @Param(""):()中的名稱要與上述的SQL語句中的[:名稱]相同
-	 */
-
 	/* doQueryInfo */
 	@Query("select new com.example.payment_confirmation_project.vo.PaymentInfo"
 			+ "(pay.id, pay.objectId, per.building, per.ownerName, per.tenantName, per.rent, pay.paymentDeadline,"

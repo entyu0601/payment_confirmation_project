@@ -20,7 +20,7 @@ import com.example.payment_confirmation_project.vo.PaymentReq;
 import com.example.payment_confirmation_project.vo.PaymentRes;
 import com.example.payment_confirmation_project.vo.PersonlReq;
 
-@CrossOrigin // �s�e�ݪ��F��
+@CrossOrigin
 @RestController
 public class PaymentController {
 
@@ -30,44 +30,51 @@ public class PaymentController {
 	@Autowired
 	private PaymentDaoImpl paymentDaoImpl;
 
+	/* do Query PaymentInfo -->　入力確認機能*/
 	@PostMapping(value = "/api/doQueryInfo")
 	public PaymentRes doQueryInfo() {
 		return paymentService.doQueryInfo();
 	}
 
+	/* get PaymentInfo By Id -->　IDを利用して、該当賃貸物件データを検索*/
 	@PostMapping(value = "/api/getPaymentInfo")
 	public PaymentRes getPaymentInfo(@RequestBody PaymentReq payReq) {
 		return paymentService.getPaymentInfo(payReq.getId());
 	}
 
+	/* do Query By PaymentDate --> 年月檢索機能を利用して、入力確認データを検索 */
 	@PostMapping(value = "/api/doQueryByPaymentDate")
 	public PaymentRes doQueryByPaymentDate(@RequestBody PaymentReq payReq) {
 		return paymentService.doQueryByPaymentDate(payReq.getStartDate(), payReq.getEndDate());
 	}
 
+	/* do Query By RentsMonth --> 月份檢索機能を利用して、入力確認データを検索 */
 	@PostMapping(value = "/api/doQueryByRentsMonth")
 	public PaymentRes doQueryByRentsMonth(@RequestBody PersonlReq req) {
 		return paymentService.doQueryByRentsMonth(req.getRentsMonth());
 	}
 
-	@PostMapping(value = "/api/createPayment")
-	public PaymentDataRes createPayment(@RequestBody PaymentReq payReq) throws Exception {
-		return paymentService.createPayment(payReq.getObjectId(), payReq.getPaymentDeadline(), payReq.getPaymentDate(),
-				payReq.getPaymentMethod(), payReq.getPaymentMonths(), payReq.getRentsMonth());
-	}
+	/* createPayment --> テナント支払情報の作成 */
+//	@PostMapping(value = "/api/createPayment")
+//	public PaymentDataRes createPayment(@RequestBody PaymentReq payReq) throws Exception {
+//		return paymentService.createPayment(payReq.getObjectId(), payReq.getPaymentDeadline(), payReq.getPaymentDate(),
+//				payReq.getPaymentMethod(), payReq.getPaymentMonths(), payReq.getRentsMonth());
+//	}
 
+	/* updatePayment --> テナント支払情報の更新（編集機能） */
 	@PostMapping(value = "/api/updatePayment")
 	public PaymentDataRes updatePayment(@RequestBody PaymentReq payReq) throws Exception {
 		return paymentService.updatePayment(payReq.getId(), payReq.getObjectId(), payReq.getPaymentDate(),
 				payReq.getPaymentMonths(), payReq.getRentsMonth());
 	}
 
+	/* doQuery　With　Limit　And　PageSize --> 検索数（検索機能） */
 	@PostMapping(value = "/api/doQueryWithLimitAndPagesize")
 	public PaymentRes doQueryWithLimitAndPagesize(@RequestBody PaymentReq payReq) {
 		List<PaymentInfo> paymentList = paymentDaoImpl.doQueryWithPageSizeAndStartPosition(payReq.getPageSize(),
 				payReq.getStartPosition());
 		if (CollectionUtils.isEmpty(paymentList)) {
-			return new PaymentRes(RtnInfo.DATA_NOT_FOUND.getMessage());
+			return new PaymentRes(RtnInfo.DATA_IS_NOT_FOUND.getMessage());
 		}
 		return new PaymentRes(paymentList, RtnInfo.DATA_IS_FOUND.getMessage());
 	}
